@@ -31,6 +31,37 @@ class _MyHomePageState extends State<MyHomePage> {
       color: Color.fromARGB(255, 255, 255, 255),
       fontWeight: FontWeight.bold);
 
+  final controller = new TextEditingController();
+  String currentText;
+
+  @override
+  void initState() {
+    controller.addListener(_textChangedCallback);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  _textChangedCallback() {
+    currentText = controller.text;
+    print("Changed Text: ${controller.text}");
+  }
+
+  _buttonPressedCallback(String string) async {
+    if (string.length > 0) {
+      print("Origind URL: ${string}");
+      loadUrl(string);
+    }
+  }
+
+  void loadUrl(String url) {
+    String clientId = "JTyd6JPXfllV7ftKGDCV";
+    String clientSecret = "tcpATloEHl";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 bottomRight: _radius)),
         labelText: 'Long URL',
       ),
+      controller: controller,
     );
   }
 
@@ -89,8 +121,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return CupertinoButton(
       pressedOpacity: 0.7,
       borderRadius: _radius,
-      onPressed: () {},
-      child: Text('DONE'),
+      onPressed: () {
+        _buttonPressedCallback(currentText);
+      },
+      child: Text('Done'),
       color: Colors.green,
     );
   }
