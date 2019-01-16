@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,6 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final controller = new TextEditingController();
   String currentText;
+  String shortenUrl;
 
   @override
   void initState() {
@@ -50,16 +55,34 @@ class _MyHomePageState extends State<MyHomePage> {
     print("Changed Text: ${controller.text}");
   }
 
-  _buttonPressedCallback(String string) async {
-    if (string.length > 0) {
-      print("Origind URL: ${string}");
-      loadUrl(string);
-    }
-  }
+//  void loadUrl(String url) {
 
-  void loadUrl(String url) {
+//  }
+
+  Future<Null> getData(String url) async {
     String clientId = "JTyd6JPXfllV7ftKGDCV";
     String clientSecret = "tcpATloEHl";
+    print("Origind URL: ${url}");
+
+    http.Response response = await http.get(
+        Uri.encodeFull(
+            "https://openapi.naver.com/v1/util/shorturl.json?url=${url}"),
+        headers: {
+          "Accept": "application/json",
+          "X-Naver-Client-Id": clientId,
+          "X-Naver-Client-Secret": clientSecret
+        });
+
+    print(response.body);
+    Map<String, dynamic> data = jsonDecode(response.body);
+
+    setState(() {
+      String result = data['result'];
+      print(result);
+
+      Map<String, String> resultData = jsonDecode(result);
+      shortenUrl = resultData['url'];
+    });
   }
 
   @override
@@ -81,6 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: myButton(),
               ),
             ),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+                child: futureWidgetOnButtonPress())
           ],
         ),
       ),
@@ -121,11 +147,18 @@ class _MyHomePageState extends State<MyHomePage> {
     return CupertinoButton(
       pressedOpacity: 0.7,
       borderRadius: _radius,
-      onPressed: () {
-        _buttonPressedCallback(currentText);
-      },
+      onPressed: () => getData(currentText),
       child: Text('Done'),
       color: Colors.green,
     );
+  }
+
+  Widget futureWidgetOnButtonPress() {
+    return new FutureBuilder<String>(builder: (context, snapshot) {
+      if (shortenUrl != null) {
+        return new Text(shortenUrl);
+      }
+      return new Text("no data yet");
+    });
   }
 }
