@@ -1,13 +1,14 @@
 import 'dart:convert';
 
+import 'package:blink/Response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -74,14 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
         });
 
     print(response.body);
-    Map<String, dynamic> data = jsonDecode(response.body);
-
+    final json = jsonDecode(response.body);
     setState(() {
-      String result = data['result'];
-      print(result);
-
-      Map<String, String> resultData = jsonDecode(result);
-      shortenUrl = resultData['url'];
+      final res = new Response.fromJson(json);
+      if (res.code == "200") {
+        shortenUrl = res.result.url;
+      } else {
+        shortenUrl = "ERROR!";
+      }
     });
   }
 
@@ -105,8 +106,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-                child: futureWidgetOnButtonPress())
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+              child: futureWidgetOnButtonPress(),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+              child: futureQrImageOnButtonPress(),
+            ),
           ],
         ),
       ),
@@ -156,9 +162,35 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget futureWidgetOnButtonPress() {
     return new FutureBuilder<String>(builder: (context, snapshot) {
       if (shortenUrl != null) {
-        return new Text(shortenUrl);
+        return new GestureDetector(
+          child: new Text(shortenUrl),
+          onLongPress: () {
+            Clipboard.setData(new ClipboardData(text: shortenUrl));
+            _showToast(context);
+          },
+        );
       }
-      return new Text("no data yet");
+      return new Text("");
     });
+  }
+
+  Widget futureQrImageOnButtonPress() {
+    return new FutureBuilder<String>(builder: (context, snapshot) {
+      if (shortenUrl != null) {
+        return new Image.network("$shortenUrl.qr");
+      }
+      return new Text("");
+    });
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = Scaffold.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: const Text('Copy completed'),
+        action: SnackBarAction(
+            label: 'CONFIRM', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
   }
 }
