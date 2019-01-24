@@ -56,10 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
     print("Changed Text: ${controller.text}");
   }
 
-//  void loadUrl(String url) {
-
-//  }
-
   Future<Null> getData(String url) async {
     String clientId = "JTyd6JPXfllV7ftKGDCV";
     String clientSecret = "tcpATloEHl";
