@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:share/share.dart';
 
 void main() => runApp(MyApp());
 
@@ -35,8 +36,11 @@ class _MyHomePageState extends State<MyHomePage> {
       fontSize: 22.0,
       color: Color.fromARGB(255, 255, 255, 255),
       fontWeight: FontWeight.bold);
+  final EdgeInsets _edgeInsets =
+      const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0);
 
   final controller = new TextEditingController();
+
   String currentText;
   String shortenUrl;
 
@@ -91,24 +95,28 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+              padding: _edgeInsets,
               child: myTextField(),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+              padding: _edgeInsets,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: myButton(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+              padding: _edgeInsets,
               child: futureWidgetOnButtonPress(),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+              padding: _edgeInsets,
               child: futureQrImageOnButtonPress(),
             ),
+            Padding(
+              padding: _edgeInsets,
+              child: shareButton(),
+            )
           ],
         ),
       ),
@@ -155,6 +163,17 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget shareButton() {
+    final BorderRadius _radius = BorderRadius.all(Radius.circular(16.0));
+    return CupertinoButton(
+      pressedOpacity: 0.7,
+      borderRadius: _radius,
+      onPressed: () => share(shortenUrl),
+      child: Text('Share'),
+      color: Colors.green,
+    );
+  }
+
   Widget futureWidgetOnButtonPress() {
     return new FutureBuilder<String>(builder: (context, snapshot) {
       if (shortenUrl != null) {
@@ -177,6 +196,10 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       return new Text("");
     });
+  }
+
+  void share(String url) {
+    Share.share(url);
   }
 
   void _showToast(BuildContext context) {
